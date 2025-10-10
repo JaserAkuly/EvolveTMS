@@ -1,10 +1,21 @@
 import { createBrowserClient } from '@supabase/ssr'
 
 export const createClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
   
-  return createBrowserClient(supabaseUrl, supabaseAnonKey)
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase environment variables are not set properly')
+    console.warn('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl || 'NOT SET')
+    console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '[SET]' : 'NOT SET')
+    // Return a client with empty strings to avoid breaking the app completely
+    // This will show connection errors but won't crash the app
+  }
+  
+  return createBrowserClient(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key'
+  )
 }
 
 export type Database = {
