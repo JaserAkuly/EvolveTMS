@@ -54,7 +54,7 @@ export default function DebugPage() {
         
         <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-lg">
           <p className="text-sm">
-            <strong>Note:</strong> If variables show as "NOT SET", they need to be added in Vercel Project Settings → Environment Variables
+            <strong>Note:</strong> If variables show as &quot;NOT SET&quot;, they need to be added in Vercel Project Settings → Environment Variables
           </p>
         </div>
       </div>
