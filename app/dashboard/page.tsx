@@ -250,25 +250,27 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-4">
                   {stats.recentLoads.map((load) => (
-                    <div key={load.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{load.load_number}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {load.origin?.city}, {load.origin?.state} → {load.destination?.city}, {load.destination?.state}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {load.shipper?.name} • {load.carrier?.name || 'Unassigned'}
-                        </p>
+                    <Link key={load.id} href={`/shipments/${load.id}`}>
+                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{load.load_number}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {load.origin?.city}, {load.origin?.state} → {load.destination?.city}, {load.destination?.state}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {load.shipper?.name} • {load.carrier?.name || 'Unassigned'}
+                          </p>
+                        </div>
+                        <div className="text-right space-y-1">
+                          <Badge className={getStatusColor(load.status)}>
+                            {load.status.replace('_', ' ')}
+                          </Badge>
+                          {load.rate && (
+                            <p className="text-sm font-medium">{formatCurrency(load.rate)}</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right space-y-1">
-                        <Badge className={getStatusColor(load.status)}>
-                          {load.status.replace('_', ' ')}
-                        </Badge>
-                        {load.rate && (
-                          <p className="text-sm font-medium">{formatCurrency(load.rate)}</p>
-                        )}
-                      </div>
-                    </div>
+                    </Link>
                   ))}
                   {stats.recentLoads.length === 0 && (
                     <div className="text-center py-8 text-muted-foreground">
