@@ -18,14 +18,14 @@ export default function APITestPage() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
     const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-    setResults(prev => ({
+    setResults((prev: any) => ({
       ...prev,
       testing: true,
       testStarted: new Date().toISOString()
     }))
 
     if (!url || !key) {
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         error: 'Environment variables not set',
         testing: false
@@ -43,7 +43,7 @@ export default function APITestPage() {
         }
       })
 
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         apiStatus: response.status,
         apiStatusText: response.statusText,
@@ -60,7 +60,7 @@ export default function APITestPage() {
 
       const profilesData = await profilesResponse.text()
       
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         profilesStatus: profilesResponse.status,
         profilesData: profilesData,
@@ -69,7 +69,7 @@ export default function APITestPage() {
       }))
 
     } catch (error: any) {
-      setResults(prev => ({
+      setResults((prev: any) => ({
         ...prev,
         error: error.message,
         testing: false
