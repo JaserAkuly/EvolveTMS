@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const loadingTimeout = setTimeout(() => {
       console.log('Forcing loading to false after timeout')
       setLoading(false)
-    }, 10000)
+    }, 3000) // Reduced to 3 seconds for better UX
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {

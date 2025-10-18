@@ -9,7 +9,13 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Building2, Plus, Search, Phone, Mail, DollarSign, Calendar } from 'lucide-react'
+import { Building2, Plus, Search, Phone, Mail, DollarSign, Calendar, Edit2, MoreVertical } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface Shipper {
   id: string
@@ -116,9 +122,48 @@ export default function ShippersPage() {
                       <Building2 className="h-5 w-5 text-primary" />
                       <CardTitle className="text-lg">{shipper.name}</CardTitle>
                     </div>
-                    <Badge variant={shipper.is_active ? "default" : "secondary"}>
-                      {shipper.is_active ? "Active" : "Inactive"}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Badge variant={shipper.is_active ? "default" : "secondary"}>
+                        {shipper.is_active ? "Active" : "Inactive"}
+                      </Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => toast({ title: "Edit", description: `Edit functionality for ${shipper.name} coming soon!` })}>
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={async () => {
+                              const { error } = await supabase
+                                .from('shippers')
+                                .update({ is_active: !shipper.is_active })
+                                .eq('id', shipper.id)
+                              
+                              if (error) {
+                                toast({ 
+                                  title: 'Error',
+                                  description: 'Failed to update shipper status',
+                                  variant: 'destructive'
+                                })
+                              } else {
+                                toast({ 
+                                  title: 'Success',
+                                  description: `${shipper.name} status updated`
+                                })
+                                fetchShippers()
+                              }
+                            }}
+                          >
+                            {shipper.is_active ? 'Deactivate' : 'Activate'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                   {shipper.billing_contact && (
                     <p className="text-sm text-muted-foreground">

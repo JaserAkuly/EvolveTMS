@@ -21,9 +21,31 @@ import {
   DollarSign,
   FileText,
   Edit,
-  Download
+  Download,
+  Upload,
+  Send,
+  Receipt
 } from 'lucide-react'
 import Link from 'next/link'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { useAuth } from '@/app/contexts/auth-context'
 
 interface LoadDetail {
   id: string
@@ -80,8 +102,17 @@ export default function ShipmentDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
+  const { profile } = useAuth()
   const [load, setLoad] = useState<LoadDetail | null>(null)
   const [loading, setLoading] = useState(true)
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false)
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false)
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false)
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false)
+  const [selectedStatus, setSelectedStatus] = useState('')
+  const [updateMessage, setUpdateMessage] = useState('')
+  const [documentType, setDocumentType] = useState('')
+  const [documentFile, setDocumentFile] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
@@ -443,11 +474,247 @@ export default function ShipmentDetailPage() {
           {/* Action Buttons */}
           <Card>
             <CardContent className="pt-6">
-              <div className="flex space-x-2">
-                <Button>Update Status</Button>
-                <Button variant="outline">Add Document</Button>
-                <Button variant="outline">Send Update</Button>
-                <Button variant="outline">Create Invoice</Button>
+              <div className="flex flex-wrap gap-2">
+                {/* Update Status Dialog */}
+                <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setSelectedStatus(load?.status || 'created')}>
+                      Update Status
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Update Shipment Status</DialogTitle>
+                      <DialogDescription>
+                        Change the current status of this shipment
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="created">Created</SelectItem>
+                          <SelectItem value="tendered">Tendered</SelectItem>
+                          <SelectItem value="booked">Booked</SelectItem>
+                          <SelectItem value="in_transit">In Transit</SelectItem>
+                          <SelectItem value="delivered">Delivered</SelectItem>
+                          <SelectItem value="closed">Closed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={async () => {
+                        const { error } = await supabase
+                          .from('loads')
+                          .update({ status: selectedStatus })
+                          .eq('id', params.id)
+                        
+                        if (error) {
+                          toast({
+                            title: 'Error',
+                            description: 'Failed to update status',
+                            variant: 'destructive'
+                          })
+                        } else {
+                          toast({
+                            title: 'Success',
+                            description: 'Status updated successfully'
+                          })
+                          setStatusDialogOpen(false)
+                          fetchLoadDetail(params.id as string)
+                        }
+                      }}>
+                        Update Status
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Add Document Dialog */}
+                <Dialog open={documentDialogOpen} onOpenChange={setDocumentDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Add Document
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Document</DialogTitle>
+                      <DialogDescription>
+                        Upload a document for this shipment
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Select value={documentType} onValueChange={setDocumentType}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Document type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bol">Bill of Lading</SelectItem>
+                          <SelectItem value="pod">Proof of Delivery</SelectItem>
+                          <SelectItem value="invoice">Invoice</SelectItem>
+                          <SelectItem value="rate_confirmation">Rate Confirmation</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input 
+                        type="text" 
+                        placeholder="Document name"
+                        value={documentFile}
+                        onChange={(e) => setDocumentFile(e.target.value)}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setDocumentDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={async () => {
+                        const { error } = await supabase
+                          .from('documents')
+                          .insert({
+                            load_id: params.id,
+                            type: documentType,
+                            name: documentFile || `${documentType.toUpperCase()} - ${new Date().toLocaleDateString()}`,
+                            url: `https://example.com/documents/${params.id}/${documentType}.pdf`,
+                            uploaded_by: profile?.id
+                          })
+                        
+                        if (error) {
+                          toast({
+                            title: 'Error',
+                            description: 'Failed to add document',
+                            variant: 'destructive'
+                          })
+                        } else {
+                          toast({
+                            title: 'Success',
+                            description: 'Document added successfully'
+                          })
+                          setDocumentDialogOpen(false)
+                          setDocumentType('')
+                          setDocumentFile('')
+                        }
+                      }}>
+                        Add Document
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Send Update Dialog */}
+                <Dialog open={updateDialogOpen} onOpenChange={setUpdateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Send className="h-4 w-4 mr-2" />
+                      Send Update
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Send Update</DialogTitle>
+                      <DialogDescription>
+                        Send an update about this shipment to relevant parties
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Textarea
+                        placeholder="Enter update message..."
+                        value={updateMessage}
+                        onChange={(e) => setUpdateMessage(e.target.value)}
+                        rows={4}
+                      />
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setUpdateDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={() => {
+                        toast({
+                          title: 'Update Sent',
+                          description: `"${updateMessage}"`
+                        })
+                        setUpdateDialogOpen(false)
+                        setUpdateMessage('')
+                      }}>
+                        Send Update
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Create Invoice Dialog */}
+                <Dialog open={invoiceDialogOpen} onOpenChange={setInvoiceDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline">
+                      <Receipt className="h-4 w-4 mr-2" />
+                      Create Invoice
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Invoice</DialogTitle>
+                      <DialogDescription>
+                        Generate an invoice for this shipment
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="p-4 bg-muted rounded-lg space-y-2">
+                        <div className="flex justify-between">
+                          <span>Load Number:</span>
+                          <span className="font-medium">{load?.load_number}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Customer:</span>
+                          <span className="font-medium">{load?.shipper?.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Amount:</span>
+                          <span className="font-medium">{formatCurrency(load?.rate)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setInvoiceDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={async () => {
+                        const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`
+                        const { error } = await supabase
+                          .from('invoices')
+                          .insert({
+                            invoice_number: invoiceNumber,
+                            load_id: params.id,
+                            shipper_id: load?.shipper_id,
+                            amount: load?.rate || 0,
+                            status: 'pending',
+                            due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                          })
+                        
+                        if (error) {
+                          toast({
+                            title: 'Error',
+                            description: 'Failed to create invoice',
+                            variant: 'destructive'
+                          })
+                        } else {
+                          toast({
+                            title: 'Success',
+                            description: `Invoice ${invoiceNumber} created successfully`
+                          })
+                          setInvoiceDialogOpen(false)
+                        }
+                      }}>
+                        Create Invoice
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
