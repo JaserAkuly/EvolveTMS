@@ -690,7 +690,7 @@ export default function ShipmentDetailPage() {
                           .insert({
                             invoice_number: invoiceNumber,
                             load_id: params.id,
-                            shipper_id: load?.shipper_id,
+                            shipper_id: load?.shipper?.id,
                             amount: load?.rate || 0,
                             status: 'pending',
                             due_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
