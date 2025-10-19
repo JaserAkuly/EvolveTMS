@@ -197,7 +197,7 @@ export default function ShipmentDetailPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="flex-1 p-8">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8">
             <div>Loading shipment details...</div>
           </div>
         </AppLayout>
@@ -209,7 +209,7 @@ export default function ShipmentDetailPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="flex-1 p-8">
+          <div className="flex-1 p-4 sm:p-6 lg:p-8">
             <div>Shipment not found</div>
           </div>
         </AppLayout>
@@ -220,7 +220,7 @@ export default function ShipmentDetailPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="flex-1 space-y-6 p-8 pt-6">
+        <div className="flex-1 space-y-4 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/shipments">
@@ -230,31 +230,31 @@ export default function ShipmentDetailPage() {
             </Button>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3">
-                <h2 className="text-3xl font-bold tracking-tight">{load.load_number}</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight break-words">{load.load_number}</h2>
                 <Badge className={getStatusColor(load.status)}>
                   {load.status.replace('_', ' ')}
                 </Badge>
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Created {formatDate(load.created_at)}
               </p>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="outline">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 <Edit className="mr-2 h-4 w-4" />
                 Edit
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto">
                 <Download className="mr-2 h-4 w-4" />
                 Export
               </Button>
             </div>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2">
             {/* Route Information */}
             <Card>
               <CardHeader>
@@ -263,15 +263,15 @@ export default function ShipmentDetailPage() {
                   <span>Route Information</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
                   <h4 className="font-semibold text-sm text-green-600 mb-2">ORIGIN</h4>
                   {load.origin ? (
                     <div className="space-y-1">
-                      <div className="font-medium">{load.origin.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {load.origin.address}<br/>
-                        {load.origin.city}, {load.origin.state} {load.origin.zip}
+                      <div className="font-medium break-words">{load.origin.name}</div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div className="break-words">{load.origin.address}</div>
+                        <div className="break-words">{load.origin.city}, {load.origin.state} {load.origin.zip}</div>
                       </div>
                       {load.origin.contact_name && (
                         <div className="text-sm">
@@ -291,10 +291,10 @@ export default function ShipmentDetailPage() {
                   <h4 className="font-semibold text-sm text-red-600 mb-2">DESTINATION</h4>
                   {load.destination ? (
                     <div className="space-y-1">
-                      <div className="font-medium">{load.destination.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {load.destination.address}<br/>
-                        {load.destination.city}, {load.destination.state} {load.destination.zip}
+                      <div className="font-medium break-words">{load.destination.name}</div>
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div className="break-words">{load.destination.address}</div>
+                        <div className="break-words">{load.destination.city}, {load.destination.state} {load.destination.zip}</div>
                       </div>
                       {load.destination.contact_name && (
                         <div className="text-sm">
@@ -318,14 +318,14 @@ export default function ShipmentDetailPage() {
                   <span>Parties Involved</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div>
                   <h4 className="font-semibold text-sm mb-2">SHIPPER</h4>
                   {load.shipper ? (
                     <div className="space-y-1">
-                      <div className="font-medium">{load.shipper.name}</div>
+                      <div className="font-medium break-words">{load.shipper.name}</div>
                       {load.shipper.email && (
-                        <div className="text-sm text-muted-foreground">{load.shipper.email}</div>
+                        <div className="text-sm text-muted-foreground break-all">{load.shipper.email}</div>
                       )}
                       {load.shipper.phone && (
                         <div className="text-sm text-muted-foreground">{load.shipper.phone}</div>
@@ -342,7 +342,7 @@ export default function ShipmentDetailPage() {
                   <h4 className="font-semibold text-sm mb-2">CARRIER</h4>
                   {load.carrier ? (
                     <div className="space-y-1">
-                      <div className="font-medium">{load.carrier.name}</div>
+                      <div className="font-medium break-words">{load.carrier.name}</div>
                       {(load.carrier.mc_number || load.carrier.dot_number) && (
                         <div className="text-sm text-muted-foreground">
                           {load.carrier.mc_number && `MC: ${load.carrier.mc_number}`}
@@ -351,7 +351,7 @@ export default function ShipmentDetailPage() {
                         </div>
                       )}
                       {load.carrier.email && (
-                        <div className="text-sm text-muted-foreground">{load.carrier.email}</div>
+                        <div className="text-sm text-muted-foreground break-all">{load.carrier.email}</div>
                       )}
                       {load.carrier.phone && (
                         <div className="text-sm text-muted-foreground">{load.carrier.phone}</div>
@@ -372,18 +372,18 @@ export default function ShipmentDetailPage() {
                   <span>Cargo & Schedule</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <Label className="text-sm font-medium">Pickup Date</Label>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex items-center space-x-2 mt-1 text-sm">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>{formatDate(load.pickup_date)}</span>
                     </div>
                   </div>
                   <div>
                     <Label className="text-sm font-medium">Delivery Date</Label>
-                    <div className="flex items-center space-x-2 mt-1">
+                    <div className="flex items-center space-x-2 mt-1 text-sm">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span>{formatDate(load.delivery_date)}</span>
                     </div>
@@ -393,21 +393,21 @@ export default function ShipmentDetailPage() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Commodity:</span>
-                    <span className="text-sm font-medium">{load.commodity || 'N/A'}</span>
+                    <span className="text-sm font-medium break-words">{load.commodity || 'N/A'}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Equipment:</span>
                     <span className="text-sm font-medium">{load.equipment_type || 'N/A'}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Weight:</span>
                     <span className="text-sm font-medium">
                       {load.weight ? `${load.weight.toLocaleString()} lbs` : 'N/A'}
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Pieces:</span>
                     <span className="text-sm font-medium">{load.pieces || 'N/A'}</span>
                   </div>
@@ -423,13 +423,13 @@ export default function ShipmentDetailPage() {
                   <span>Financial Information</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 space-y-4">
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Customer Rate:</span>
-                    <span className="text-lg font-semibold">{formatCurrency(load.rate)}</span>
+                    <span className="text-lg font-semibold break-all">{formatCurrency(load.rate)}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
                     <span className="text-sm text-muted-foreground">Carrier Cost:</span>
                     <span className="text-lg font-semibold">{formatCurrency(load.carrier_rate)}</span>
                   </div>
@@ -437,13 +437,13 @@ export default function ShipmentDetailPage() {
                   {load.rate && load.carrier_rate && (
                     <>
                       <Separator />
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
                         <span className="text-sm font-medium">Gross Margin:</span>
                         <span className="text-lg font-bold text-green-600">
                           {formatCurrency(load.rate - load.carrier_rate)}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
                         <span className="text-sm text-muted-foreground">Margin %:</span>
                         <span className="text-sm font-medium">
                           {((load.rate - load.carrier_rate) / load.rate * 100).toFixed(1)}%
@@ -474,7 +474,7 @@ export default function ShipmentDetailPage() {
           {/* Action Buttons */}
           <Card>
             <CardContent className="pt-6">
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {/* Update Status Dialog */}
                 <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
                   <DialogTrigger asChild>
@@ -482,7 +482,7 @@ export default function ShipmentDetailPage() {
                       Update Status
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-sm sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Update Shipment Status</DialogTitle>
                       <DialogDescription>
@@ -543,7 +543,7 @@ export default function ShipmentDetailPage() {
                       Add Document
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-sm sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Add Document</DialogTitle>
                       <DialogDescription>
@@ -615,7 +615,7 @@ export default function ShipmentDetailPage() {
                       Send Update
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-sm sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Send Update</DialogTitle>
                       <DialogDescription>
@@ -656,7 +656,7 @@ export default function ShipmentDetailPage() {
                       Create Invoice
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-sm sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle>Create Invoice</DialogTitle>
                       <DialogDescription>
@@ -664,18 +664,18 @@ export default function ShipmentDetailPage() {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                      <div className="p-4 bg-muted rounded-lg space-y-2">
-                        <div className="flex justify-between">
+                      <div className="p-3 sm:p-4 bg-muted rounded-lg space-y-2 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                           <span>Load Number:</span>
-                          <span className="font-medium">{load?.load_number}</span>
+                          <span className="font-medium break-words">{load?.load_number}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                           <span>Customer:</span>
                           <span className="font-medium">{load?.shipper?.name}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
                           <span>Amount:</span>
-                          <span className="font-medium">{formatCurrency(load?.rate)}</span>
+                          <span className="font-medium break-all">{formatCurrency(load?.rate)}</span>
                         </div>
                       </div>
                     </div>
