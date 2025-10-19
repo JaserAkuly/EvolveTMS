@@ -29,28 +29,47 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      console.log('Attempting login with email:', email)
+      
+      // Test Supabase connection first
+      const { data: connectionTest, error: connectionError } = await supabase.from('profiles').select('count').limit(1)
+      if (connectionError) {
+        console.error('Supabase connection failed:', connectionError)
+        toast({
+          title: 'Connection Error',
+          description: `Unable to connect to database: ${connectionError.message}`,
+          variant: 'destructive',
+        })
+        setLoading(false)
+        return
+      }
+      console.log('Supabase connection successful')
+      
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password: password.trim(),
       })
 
       if (error) {
+        console.error('Login error:', error)
         toast({
           title: 'Error signing in',
-          description: error.message,
+          description: `${error.message} (Code: ${error.status || 'N/A'})`,
           variant: 'destructive',
         })
       } else {
+        console.log('Login successful')
         toast({
           title: 'Welcome back!',
           description: 'You have been successfully signed in.',
         })
         router.push('/dashboard')
       }
-    } catch {
+    } catch (err) {
+      console.error('Unexpected login error:', err)
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred',
+        description: `An unexpected error occurred: ${err}`,
         variant: 'destructive',
       })
     } finally {
@@ -64,18 +83,22 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
+      console.log('Demo login attempt:', demoEmail)
+      
       const { error } = await supabase.auth.signInWithPassword({
         email: demoEmail,
         password: demoPassword,
       })
 
       if (error) {
+        console.error('Demo login error:', error)
         toast({
           title: 'Error signing in',
-          description: error.message,
+          description: `${error.message} (Code: ${error.status || 'N/A'})`,
           variant: 'destructive',
         })
       } else {
+        console.log('Demo login successful')
         toast({
           title: 'Welcome!',
           description: `Signed in as ${demoEmail}`,

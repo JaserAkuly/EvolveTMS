@@ -1,21 +1,28 @@
 import { createBrowserClient } from '@supabase/ssr'
 
+// Hardcoded values as backup to ensure production always works
+const FALLBACK_SUPABASE_URL = 'https://dmccydifdtkjlpmfgphg.supabase.co'
+const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtY2N5ZGlmZHRramxwbWZncGhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk4OTM2MTgsImV4cCI6MjA3NTQ2OTYxOH0.v1CjyBUfJ-XRgdLJffRN6o6dRZypM_qM_lVruj7N1dM'
+
 export const createClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  // Try to get from environment variables first
+  let supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  let supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase environment variables are not set properly')
-    console.warn('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl || 'NOT SET')
-    console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? '[SET]' : 'NOT SET')
-    // Return a client with empty strings to avoid breaking the app completely
-    // This will show connection errors but won't crash the app
+  // If environment variables are missing, use hardcoded fallbacks
+  if (!supabaseUrl || supabaseUrl === '') {
+    console.warn('NEXT_PUBLIC_SUPABASE_URL not found in environment, using fallback')
+    supabaseUrl = FALLBACK_SUPABASE_URL
   }
   
-  return createBrowserClient(
-    supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseAnonKey || 'placeholder-key'
-  )
+  if (!supabaseAnonKey || supabaseAnonKey === '') {
+    console.warn('NEXT_PUBLIC_SUPABASE_ANON_KEY not found in environment, using fallback')
+    supabaseAnonKey = FALLBACK_SUPABASE_ANON_KEY
+  }
+  
+  console.log('Creating Supabase client with URL:', supabaseUrl)
+  
+  return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
 
 export type Database = {

@@ -34,6 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Fetching profile for user:', userId)
       
+      // Test the connection first
+      const connectionTest = await supabase.from('profiles').select('count').limit(1)
+      if (connectionTest.error) {
+        console.error('Supabase connection test failed:', connectionTest.error)
+        throw new Error('Supabase connection failed: ' + connectionTest.error.message)
+      }
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
