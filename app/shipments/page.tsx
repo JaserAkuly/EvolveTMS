@@ -6,12 +6,13 @@ import { ProtectedRoute } from '@/components/auth/protected-route'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/app/contexts/auth-context'
-import { Plus, Search, Download } from 'lucide-react'
+import { Plus, Search, Download, Filter, Calendar, X } from 'lucide-react'
 import Link from 'next/link'
 
 interface Load {
@@ -37,11 +38,31 @@ export default function ShipmentsPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [carrierFilter, setCarrierFilter] = useState<string>('all')
+  const [shipperFilter, setShipperFilter] = useState<string>('all')
+  const [dateFilter, setDateFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<string>('created_at')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [carriers, setCarriers] = useState<{id: string, name: string}[]>([])
+  const [shippers, setShippers] = useState<{id: string, name: string}[]>([])
+  const [showFilters, setShowFilters] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
     fetchLoads()
+    fetchCarriers()
+    fetchShippers()
   }, [])
+
+  const fetchCarriers = async () => {
+    const { data } = await supabase.from('carriers').select('id, name').order('name')
+    if (data) setCarriers(data)
+  }
+
+  const fetchShippers = async () => {
+    const { data } = await supabase.from('shippers').select('id, name').order('name')
+    if (data) setShippers(data)
+  }
 
   const fetchLoads = async () => {
     try {
@@ -146,8 +167,58 @@ export default function ShipmentsPage() {
       load.commodity?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesStatus = statusFilter === 'all' || load.status === statusFilter
+    const matchesCarrier = carrierFilter === 'all' || load.carrier?.name === carrierFilter
+    const matchesShipper = shipperFilter === 'all' || load.shipper?.name === shipperFilter
+    
+    let matchesDate = true
+    if (dateFilter !== 'all' && load.pickup_date) {
+      const pickupDate = new Date(load.pickup_date)
+      const today = new Date()
+      const daysDiff = Math.floor((pickupDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      
+      switch (dateFilter) {
+        case 'today':
+          matchesDate = daysDiff === 0
+          break
+        case 'week':
+          matchesDate = daysDiff >= 0 && daysDiff <= 7
+          break
+        case 'month':
+          matchesDate = daysDiff >= 0 && daysDiff <= 30
+          break
+        case 'past':
+          matchesDate = daysDiff < 0
+          break
+      }
+    }
 
-    return matchesSearch && matchesStatus
+    return matchesSearch && matchesStatus && matchesCarrier && matchesShipper && matchesDate
+  }).sort((a, b) => {
+    let aValue: any = a[sortBy as keyof Load]
+    let bValue: any = b[sortBy as keyof Load]
+    
+    if (sortBy === 'shipper') {
+      aValue = a.shipper?.name || ''
+      bValue = b.shipper?.name || ''
+    }
+    if (sortBy === 'carrier') {
+      aValue = a.carrier?.name || ''
+      bValue = b.carrier?.name || ''
+    }
+    if (sortBy === 'origin') {
+      aValue = `${a.origin?.city}, ${a.origin?.state}` || ''
+      bValue = `${b.origin?.city}, ${b.origin?.state}` || ''
+    }
+    if (sortBy === 'destination') {
+      aValue = `${a.destination?.city}, ${a.destination?.state}` || ''
+      bValue = `${b.destination?.city}, ${b.destination?.state}` || ''
+    }
+    
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1
+    } else {
+      return aValue < bValue ? 1 : -1
+    }
   })
 
   const exportToCSV = () => {
@@ -201,14 +272,14 @@ export default function ShipmentsPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 space-y-4 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
               <h2 className="text-3xl font-bold tracking-tight">Shipments</h2>
             </div>
             <div className="grid gap-4">
               {[...Array(5)].map((_, i) => (
                 <Card key={i}>
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="space-y-2">
                       <div className="h-4 bg-muted animate-pulse rounded w-1/4" />
                       <div className="h-3 bg-muted animate-pulse rounded w-1/2" />
@@ -227,16 +298,16 @@ export default function ShipmentsPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="flex-1 space-y-4 p-8 pt-6">
-          <div className="flex items-center justify-between">
+        <div className="flex-1 space-y-4 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <h2 className="text-3xl font-bold tracking-tight">Shipments</h2>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" onClick={exportToCSV}>
+              <Button variant="outline" size="sm" onClick={exportToCSV} className="w-full sm:w-auto">
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV
               </Button>
               {(
-                <Button asChild>
+                <Button asChild size="sm" className="w-full sm:w-auto">
                   <Link href="/shipments/new">
                     <Plus className="mr-2 h-4 w-4" />
                     New Shipment
@@ -248,73 +319,237 @@ export default function ShipmentsPage() {
 
           {/* Filters */}
           <Card>
-            <CardContent className="p-6">
-              <div className="flex space-x-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search shipments..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-8"
-                    />
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                <CardTitle className="text-lg">Filters</CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowFilters(!showFilters)}
+                >
+                  <Filter className="mr-2 h-4 w-4" />
+                  {showFilters ? 'Hide' : 'Show'} Filters
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by load #, shipper, carrier, or commodity..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-8"
+                />
+              </div>
+              
+              {showFilters && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                  {/* Status Filter */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Status</Label>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="created">Created</SelectItem>
+                        <SelectItem value="tendered">Tendered</SelectItem>
+                        <SelectItem value="booked">Booked</SelectItem>
+                        <SelectItem value="in_transit">In Transit</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="closed">Closed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Carrier Filter */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Carrier</Label>
+                    <Select value={carrierFilter} onValueChange={setCarrierFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Carriers" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Carriers</SelectItem>
+                        {carriers.map(carrier => (
+                          <SelectItem key={carrier.id} value={carrier.name}>
+                            {carrier.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Shipper Filter */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Shipper</Label>
+                    <Select value={shipperFilter} onValueChange={setShipperFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Shippers" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Shippers</SelectItem>
+                        {shippers.map(shipper => (
+                          <SelectItem key={shipper.id} value={shipper.name}>
+                            {shipper.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Date Range Filter */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Date Range</Label>
+                    <Select value={dateFilter} onValueChange={setDateFilter}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="All Dates" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Dates</SelectItem>
+                        <SelectItem value="today">Today</SelectItem>
+                        <SelectItem value="week">Next 7 Days</SelectItem>
+                        <SelectItem value="month">Next 30 Days</SelectItem>
+                        <SelectItem value="past">Past Due</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Sort By */}
+                  <div className="space-y-1">
+                    <Label className="text-xs">Sort By</Label>
+                    <Select value={sortBy} onValueChange={setSortBy}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Sort By" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="created_at">Date Created</SelectItem>
+                        <SelectItem value="pickup_date">Pickup Date</SelectItem>
+                        <SelectItem value="delivery_date">Delivery Date</SelectItem>
+                        <SelectItem value="load_number">Load Number</SelectItem>
+                        <SelectItem value="status">Status</SelectItem>
+                        <SelectItem value="rate">Rate</SelectItem>
+                        <SelectItem value="shipper">Shipper</SelectItem>
+                        <SelectItem value="carrier">Carrier</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="created">Created</SelectItem>
-                    <SelectItem value="tendered">Tendered</SelectItem>
-                    <SelectItem value="booked">Booked</SelectItem>
-                    <SelectItem value="in_transit">In Transit</SelectItem>
-                    <SelectItem value="delivered">Delivered</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              )}
+              
+              {/* Active Filters Display */}
+              {(statusFilter !== 'all' || carrierFilter !== 'all' || shipperFilter !== 'all' || dateFilter !== 'all') && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {statusFilter !== 'all' && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      Status: {statusFilter}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setStatusFilter('all')} />
+                    </Badge>
+                  )}
+                  {carrierFilter !== 'all' && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      Carrier: {carrierFilter}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setCarrierFilter('all')} />
+                    </Badge>
+                  )}
+                  {shipperFilter !== 'all' && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      Shipper: {shipperFilter}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setShipperFilter('all')} />
+                    </Badge>
+                  )}
+                  {dateFilter !== 'all' && (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      Date: {dateFilter}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setDateFilter('all')} />
+                    </Badge>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setStatusFilter('all')
+                      setCarrierFilter('all')
+                      setShipperFilter('all')
+                      setDateFilter('all')
+                    }}
+                  >
+                    Clear All
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
+
+          {/* Results Count */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredLoads.length} of {loads.length} shipments
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'} Sort
+            </Button>
+          </div>
 
           {/* Shipments List */}
           <div className="grid gap-4">
             {filteredLoads.map((load) => (
               <Card key={load.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col space-y-3">
+                    {/* Header Section */}
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <h3 className="text-lg font-semibold">{load.load_number}</h3>
                         <Badge className={getStatusColor(load.status)}>
                           {load.status.replace('_', ' ')}
                         </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        <p>
-                          <strong>Route:</strong> {load.origin?.city}, {load.origin?.state} → {load.destination?.city}, {load.destination?.state}
-                        </p>
-                        <p>
-                          <strong>Shipper:</strong> {load.shipper?.name} • <strong>Carrier:</strong> {load.carrier?.name || 'Unassigned'}
-                        </p>
-                        {load.pickup_date && (
-                          <p>
-                            <strong>Pickup:</strong> {formatDate(load.pickup_date)}
-                            {load.delivery_date && <> • <strong>Delivery:</strong> {formatDate(load.delivery_date)}</>}
-                          </p>
-                        )}
-                        {load.commodity && (
-                          <p><strong>Commodity:</strong> {load.commodity}</p>
+                        {load.rate && (
+                          <span className="sm:hidden text-sm font-semibold">{formatCurrency(load.rate)}</span>
                         )}
                       </div>
-                    </div>
-                    <div className="text-right space-y-2">
                       {load.rate && (
-                        <p className="text-lg font-semibold">{formatCurrency(load.rate)}</p>
+                        <p className="hidden sm:block text-lg font-semibold">{formatCurrency(load.rate)}</p>
                       )}
-                      <div className="flex space-x-2">
+                    </div>
+                    
+                    {/* Details Section */}
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p className="flex flex-col sm:block">
+                        <span className="font-medium">Route:</span>
+                        <span className="sm:ml-1">{load.origin?.city}, {load.origin?.state} → {load.destination?.city}, {load.destination?.state}</span>
+                      </p>
+                      <p className="flex flex-col sm:block">
+                        <span className="font-medium">Shipper:</span>
+                        <span className="sm:ml-1">{load.shipper?.name}</span>
+                        <span className="sm:ml-1">• <span className="font-medium">Carrier:</span> {load.carrier?.name || 'Unassigned'}</span>
+                      </p>
+                      {load.pickup_date && (
+                        <p className="flex flex-col sm:block">
+                          <span className="font-medium">Pickup:</span>
+                          <span className="sm:ml-1">{formatDate(load.pickup_date)}</span>
+                          {load.delivery_date && (
+                            <span className="sm:ml-1">• <span className="font-medium">Delivery:</span> {formatDate(load.delivery_date)}</span>
+                          )}
+                        </p>
+                      )}
+                      {load.commodity && (
+                        <p className="flex flex-col sm:block">
+                          <span className="font-medium">Commodity:</span>
+                          <span className="sm:ml-1">{load.commodity}</span>
+                        </p>
+                      )}
+                    </div>
+                    
+                    {/* Actions Section */}
+                    <div className="flex flex-wrap gap-2 pt-2 border-t">
                         {getAvailableActions(load).map((action) => (
                           <Button
                             key={action}
@@ -337,9 +572,8 @@ export default function ShipmentsPage() {
                           </Button>
                         ))}
                         <Button variant="outline" size="sm" asChild>
-                          <Link href={`/shipments/${load.id}`}>View</Link>
+                          <Link href={`/shipments/${load.id}`}>View Details</Link>
                         </Button>
-                      </div>
                     </div>
                   </div>
                 </CardContent>

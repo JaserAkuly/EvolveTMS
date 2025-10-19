@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Search, User, Package, FileText, DollarSign, Menu } from 'lucide-react'
+import { Bell, User, Package, FileText, DollarSign, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -51,25 +51,20 @@ export function Header({ onMobileMenuOpen }: HeaderProps) {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4 lg:px-6">
-        {/* Mobile menu button */}
+        {/* Mobile menu button - always visible on mobile */}
         <Button
-          variant="ghost"
-          size="sm"
-          className="md:hidden mr-2"
+          variant="outline"
+          size="icon"
+          className="md:hidden mr-4 h-10 w-10"
           onClick={onMobileMenuOpen}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Open menu</span>
         </Button>
         
-        <div className="flex flex-1 items-center space-x-4">
-          <div className="relative flex-1 max-w-md hidden sm:block">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search shipments, carriers..."
-              className="pl-8"
-            />
-          </div>
+        {/* Logo/Title for mobile */}
+        <div className="flex flex-1 items-center">
+          <h1 className="text-lg font-semibold md:hidden">Evolve TMS</h1>
         </div>
         <div className="flex items-center space-x-4">
           <DropdownMenu>
