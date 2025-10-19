@@ -18,6 +18,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            if ('serviceWorker' in navigator) {
+              window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+              });
+            }
+          `
+        }} />
+      </head>
       <body className={`${inter.className} antialiased min-h-screen bg-background`}>
         <AuthProvider>
           {children}

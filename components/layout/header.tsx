@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, Search, User, Package, FileText, DollarSign } from 'lucide-react'
+import { Bell, Search, User, Package, FileText, DollarSign, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -17,7 +17,11 @@ import { Badge } from '@/components/ui/badge'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export function Header() {
+interface HeaderProps {
+  onMobileMenuOpen?: () => void
+}
+
+export function Header({ onMobileMenuOpen }: HeaderProps) {
   const { profile, signOut } = useAuth()
   const router = useRouter()
   const [notifications] = useState([
@@ -47,8 +51,18 @@ export function Header() {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4 lg:px-6">
+        {/* Mobile menu button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="md:hidden mr-2"
+          onClick={onMobileMenuOpen}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+        
         <div className="flex flex-1 items-center space-x-4">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 max-w-md hidden sm:block">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"

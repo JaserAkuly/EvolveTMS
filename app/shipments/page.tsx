@@ -178,21 +178,20 @@ export default function ShipmentsPage() {
 
   const getAvailableActions = (load: Load) => {
     const isAdmin = profile?.role === 'admin'
-    const isCarrier = profile?.role === 'carrier'
     
-    if (!isAdmin && !isCarrier) return []
+    if (!isAdmin) return []
 
     switch (load.status) {
       case 'created':
-        return isAdmin ? ['tender'] : []
+        return ['tender']
       case 'tendered':
-        return isCarrier ? ['book', 'decline'] : []
+        return ['book', 'decline']
       case 'booked':
-        return isAdmin ? ['in_transit'] : []
+        return ['in_transit']
       case 'in_transit':
-        return isAdmin ? ['delivered'] : []
+        return ['delivered']
       case 'delivered':
-        return isAdmin ? ['closed'] : []
+        return ['closed']
       default:
         return []
     }
@@ -236,7 +235,7 @@ export default function ShipmentsPage() {
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV
               </Button>
-              {profile?.role === 'admin' && (
+              {(
                 <Button asChild>
                   <Link href="/shipments/new">
                     <Plus className="mr-2 h-4 w-4" />
@@ -355,7 +354,7 @@ export default function ShipmentsPage() {
                       ? 'No shipments match your search criteria.' 
                       : 'No shipments found. Create your first shipment to get started.'}
                   </p>
-                  {profile?.role === 'admin' && !searchTerm && statusFilter === 'all' && (
+                  {!searchTerm && statusFilter === 'all' && (
                     <Button className="mt-4" asChild>
                       <Link href="/shipments/new">Create First Shipment</Link>
                     </Button>

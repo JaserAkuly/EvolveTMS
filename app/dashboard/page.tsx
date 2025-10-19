@@ -144,8 +144,8 @@ export default function DashboardPage() {
     return (
       <ProtectedRoute>
         <AppLayout>
-          <div className="flex-1 space-y-4 p-8 pt-6">
-            <div className="flex items-center justify-between space-y-2">
+          <div className="flex-1 space-y-4 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
               <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -171,8 +171,8 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute>
       <AppLayout>
-        <div className="flex-1 space-y-4 p-8 pt-6">
-          <div className="flex items-center justify-between space-y-2">
+        <div className="flex-1 space-y-4 p-4 sm:p-6 lg:p-8 pt-4 sm:pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
             <div>
               <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
               <p className="text-muted-foreground">
@@ -180,7 +180,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <Button asChild>
+              <Button asChild className="w-full sm:w-auto">
                 <Link href="/shipments/new">Create Shipment</Link>
               </Button>
             </div>
@@ -242,8 +242,8 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Shipments */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
+          <div className="grid gap-4 lg:grid-cols-7">
+            <Card className="lg:col-span-4">
               <CardHeader>
                 <CardTitle>Recent Shipments</CardTitle>
               </CardHeader>
@@ -281,7 +281,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="col-span-3">
+            <Card className="lg:col-span-3">
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>

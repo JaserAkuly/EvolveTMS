@@ -19,7 +19,11 @@ interface NavItem {
   title: string
   href: string
   icon: React.ComponentType<{ className?: string }>
-  roles: ('admin' | 'carrier' | 'shipper' | 'viewer')[]
+  roles: ('admin' | 'viewer')[]
+}
+
+interface SidebarProps {
+  onNavigate?: () => void
 }
 
 const navItems: NavItem[] = [
@@ -27,53 +31,51 @@ const navItems: NavItem[] = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['admin', 'carrier', 'shipper', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Shipments',
     href: '/shipments',
     icon: Package,
-    roles: ['admin', 'carrier', 'shipper', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Carriers',
     href: '/carriers',
     icon: Truck,
-    roles: ['admin', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Shippers',
     href: '/shippers',
     icon: Building2,
-    roles: ['admin', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Locations',
     href: '/locations',
     icon: MapPin,
-    roles: ['admin', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Reports',
     href: '/reports',
     icon: BarChart3,
-    roles: ['admin', 'viewer'],
+    roles: ['admin'],
   },
   {
     title: 'Settings',
     href: '/settings',
     icon: Settings,
-    roles: ['admin', 'carrier', 'shipper', 'viewer'],
+    roles: ['admin'],
   },
 ]
 
-export function Sidebar() {
+export function Sidebar({ onNavigate }: SidebarProps) {
   const pathname = usePathname()
   const { profile } = useAuth()
 
-  const filteredNavItems = navItems.filter((item) =>
-    profile ? item.roles.includes(profile.role) : false
-  )
+  const filteredNavItems = navItems
 
   return (
     <div className="pb-12 w-64">
@@ -110,7 +112,7 @@ export function Sidebar() {
                   )}
                   asChild
                 >
-                  <Link href={item.href}>
+                  <Link href={item.href} onClick={onNavigate}>
                     <Icon className="mr-2 h-4 w-4" />
                     {item.title}
                   </Link>

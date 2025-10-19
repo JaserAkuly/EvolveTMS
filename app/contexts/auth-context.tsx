@@ -8,7 +8,7 @@ interface Profile {
   id: string
   email: string
   display_name: string | null
-  role: 'admin' | 'carrier' | 'shipper' | 'viewer'
+  role: 'admin'
   company_name: string | null
   phone: string | null
   is_active: boolean
@@ -56,7 +56,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      return data
+      // Always set role to admin for MVP
+      return {
+        ...data,
+        role: 'admin' as const
+      }
     } catch (error) {
       console.error('Error fetching profile:', error)
       // Return a default profile structure if fetch fails
